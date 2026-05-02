@@ -8,6 +8,7 @@ function CreateCourse() {
   const [data, setData] = useState({
     title: "",
     description: "",
+    status: "published",
   });
 
   const [error, setError] = useState("");
@@ -97,6 +98,22 @@ function CreateCourse() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Course Status
+              </label>
+              <select
+                value={data.status}
+                onChange={(e) =>
+                  setData({ ...data, status: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white"
+              >
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
             </div>
 
             {/* Buttons */}

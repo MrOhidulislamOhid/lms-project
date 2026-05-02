@@ -6,6 +6,8 @@ function CourseDetail() {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
   const role = localStorage.getItem("role");
 
   useEffect(() => {
@@ -18,7 +20,31 @@ function CourseDetail() {
         console.log(err.response?.data);
         setLoading(false);
       });
-  }, [id]);
+
+    // Check if student is already enrolled
+    if (role === "student") {
+      API.get("lms/enrollments/my_courses/")
+        .then((res) => {
+          const isEnrolled = res.data.some((item) => item.course === parseInt(id));
+          setEnrolled(isEnrolled);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [id, role]);
+
+  const handleEnroll = async () => {
+    setEnrolling(true);
+    try {
+      await API.post("lms/enrollments/", { course: parseInt(id) });
+      alert("Enrolled successfully!");
+      setEnrolled(true);
+    } catch (err) {
+      console.log("ENROLLMENT ERROR:", err.response?.data);
+      alert(err.response?.data?.detail || "Enrollment failed! You may already be enrolled.");
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -80,8 +106,16 @@ function CourseDetail() {
           {/* Action Buttons */}
           <div className="flex gap-4">
             {role === "student" && (
-              <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-2 px-6 rounded-lg transition">
-                Enroll Now
+              <button
+                onClick={handleEnroll}
+                disabled={enrolling || enrolled}
+                className={`font-semibold py-2 px-6 rounded-lg transition ${
+                  enrolled
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                }`}
+              >
+                {enrolling ? "Enrolling..." : enrolled ? "Already Enrolled" : "Enroll Now"}
               </button>
             )}
             {(role === "instructor" || role === "admin") && (

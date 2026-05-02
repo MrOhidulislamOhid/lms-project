@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from .models import Course, Enrollment
 from .serializers import CourseSerializer, EnrollmentSerializer
@@ -26,12 +27,17 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
-        if user.role == "instructor":
-            return Course.objects.filter(instructor=user)
-
+        # Admins can see all courses.
         if user.role == "admin":
             return Course.objects.all()
 
+        # Instructors can see their own drafts plus all published courses.
+        if user.role == "instructor":
+            return Course.objects.filter(
+                Q(instructor=user) | Q(status="published")
+            ).distinct()
+
+        # Students and other authenticated users see only published courses.
         return Course.objects.filter(status="published")
 
     def perform_create(self, serializer):
