@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 
 
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 

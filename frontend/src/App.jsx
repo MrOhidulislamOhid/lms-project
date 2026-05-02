@@ -92,7 +92,9 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       
+
 
       <Route path="/edit-course/:id" element={<EditCourse />} />
 
